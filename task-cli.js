@@ -1,18 +1,19 @@
 import readline from 'readline'
+import colors from './colors.js'
 export default class TaskCli{
+     #current_interval;
      #try_limit = 3;
      #password = 'secret';
      #rl = readline.createInterface({
             input: process.stdin, output: process.stdout
         })
     constructor(){
-
-        this.exitByCommand;
-       // this.askPassword
+        this.askPassword;
     }
 
     get askPassword(){
         this.#rl.question("Please enter a  password: ", (answer) => {
+
             if(this.#try_limit === 0){
                this.waitTenSeconds;
             }else{
@@ -21,7 +22,7 @@ export default class TaskCli{
                 }else{
 
                     console.log('\x1b[31m%s\x1b[0m',`Password is incorrect! You have ${this.#try_limit} chances`);
-                    this.#try_limit  !== 0 ? this.#try_limit --:'';
+                    this.#try_limit  !== 0 ? --this.#try_limit:'';
                     this.askPassword;
                 }
             }
@@ -29,16 +30,28 @@ export default class TaskCli{
         })
     }
     get waitTenSeconds(){
-                this.#rl.pause();
-                setTimeout(()=>{
-                    this.#rl.resume()
-                    this.#try_limit = 1;
-                    this.askPassword;
-                }, 10000);
-    }
 
+            this.#rl.pause();
+            this.#createInterval;
+            setTimeout(()=>{
+                this.#rl.resume()
+                this.#try_limit = 1;
+                this.#clearInterval
+                this.askPassword;
+            }, 11000);
+    }
+   get #createInterval(){
+         let t = 10
+         this.#current_interval = setInterval(()=>{
+             this.#setPromptAndInvoke(`You can enter password after ${t}:seconds`)
+             t--;
+         }, 1000)
+    }
+    get #clearInterval(){
+         clearInterval(this.#current_interval);
+    }
     #setPromptAndInvoke(data){
-         this.#rl.setPrompt(data);
+         this.#rl.setPrompt(`${colors.bg.red} ${data} ${colors.reset}`);
          this.#rl.prompt();
     }
     get exitByCommand(){
